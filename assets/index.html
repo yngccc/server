@@ -27,12 +27,16 @@
     <!-- Content -->
     <div style="width: 80%; margin: 0 auto; padding:10px 0px 0px 0px">
       <!-- Articles -->
-      <div style="float: left; width: 70%; background-color: lightgrey">
-	left div
+      <div style="float: left; width: 73%; background-color: lightgrey">
+	articles
       </div>
       <!-- SideBar -->
       <div style="float: right; width: 25%; background-color: lightgrey">
-	right div
+	{{range .PostTitles}}
+	<div>
+	  {{.}}
+	</div>
+	{{end}}
       </div>
     </div>
   </div>
