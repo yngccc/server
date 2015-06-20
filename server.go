@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -23,19 +24,31 @@ func main() {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return
 	}
-	type post struct {
+	type Post struct {
 		ID      int
 		Date    string
 		Title   string
 		Content string
 	}
-	posts := make([]post, 0)
+	posts := make([]Post, 0)
 	for rows.Next() {
-		var p post
+		var p Post
 		rows.Scan(&p.ID, &p.Date, &p.Title, &p.Content)
 		posts = append(posts, p)
 	}
 	rows.Close()
+	if len(posts) > 1 {
+		for i := 0; i < len(posts)-1; i++ {
+			for j := 0; j < len(posts)-1; j++ {
+				const layout = "2006-01-02"
+				t1, _ := time.Parse(layout, posts[j].Date)
+				t2, _ := time.Parse(layout, posts[j+1].Date)
+				if t1.Before(t2) {
+					posts[j], posts[j+1] = posts[j+1], posts[j]
+				}
+			}
+		}
+	}
 	log.Println("database loaded")
 
 	indexTemplate, err := template.ParseFiles("assets/index.html")
@@ -43,15 +56,17 @@ func main() {
 		log.Fatal(err)
 	}
 	indexTemplateData := struct {
-		Posts []post
+		Posts       []Post
+		RecentPosts []Post
 	}{}
+	indexTemplateData.Posts = posts
 	min := func(a int, b int) int {
 		if a <= b {
 			return a
 		}
 		return b
 	}
-	indexTemplateData.Posts = posts[0:min(16, len(posts))]
+	indexTemplateData.RecentPosts = posts[0:min(10, len(posts))]
 	indexHTML := new(bytes.Buffer)
 	indexTemplate.Execute(indexHTML, indexTemplateData)
 	log.Println("html generated")
