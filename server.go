@@ -24,15 +24,15 @@ func main() {
 		return
 	}
 	type post struct {
-		id      int
-		date    string
-		title   string
-		content string
+		ID      int
+		Date    string
+		Title   string
+		Content string
 	}
 	posts := make([]post, 0)
 	for rows.Next() {
 		var p post
-		rows.Scan(&p.id, &p.date, &p.title, &p.content)
+		rows.Scan(&p.ID, &p.Date, &p.Title, &p.Content)
 		posts = append(posts, p)
 	}
 	rows.Close()
@@ -42,13 +42,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	indexHTML := new(bytes.Buffer)
 	indexTemplateData := struct {
-		PostTitles []string
+		Posts []post
 	}{}
-	for _, post := range posts {
-		indexTemplateData.PostTitles = append(indexTemplateData.PostTitles, post.title)
+	min := func(a int, b int) int {
+		if a <= b {
+			return a
+		}
+		return b
 	}
+	indexTemplateData.Posts = posts[0:min(16, len(posts))]
+	indexHTML := new(bytes.Buffer)
 	indexTemplate.Execute(indexHTML, indexTemplateData)
 	log.Println("html generated")
 
