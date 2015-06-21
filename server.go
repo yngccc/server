@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -55,11 +56,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	indexHTML := new(bytes.Buffer)
 	indexTemplateData := struct {
-		Posts       []Post
 		RecentPosts []Post
 	}{}
-	indexTemplateData.Posts = posts
 	min := func(a int, b int) int {
 		if a <= b {
 			return a
@@ -67,14 +67,35 @@ func main() {
 		return b
 	}
 	indexTemplateData.RecentPosts = posts[0:min(10, len(posts))]
-	indexHTML := new(bytes.Buffer)
 	indexTemplate.Execute(indexHTML, indexTemplateData)
+
+	postTemplate, err := template.ParseFiles("assets/post.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	postHTMLs := make([]bytes.Buffer, len(posts))
+	for i, p := range posts {
+		postTemplateData := struct {
+			RecentPosts []Post
+			Date        string
+			Title       string
+			Content     string
+		}{indexTemplateData.RecentPosts, p.Date, p.Title, p.Content}
+		postTemplate.Execute(&postHTMLs[i], postTemplateData)
+	}
 	log.Println("html generated")
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, indexHTML.String())
 	}))
+	for i, p := range posts {
+		n := i
+		id := strconv.Itoa(p.ID)
+		router.HandleFunc("/posts/"+id, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, postHTMLs[n].String())
+		}))
+	}
 	router.Handle("/javascripts/{file}", http.StripPrefix("/javascripts/", http.FileServer(http.Dir("./assets/javascripts"))))
 	router.Handle("/images/{file}", http.StripPrefix("/images/", http.FileServer(http.Dir("./assets/images"))))
 	router.Handle("/audios/{file}", http.StripPrefix("/audios/", http.FileServer(http.Dir("./assets/audios"))))

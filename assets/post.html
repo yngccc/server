@@ -22,17 +22,21 @@
     <div style="margin-left: -20px; margin-right: -20px">
       <div style="display: table; border-spacing: 20px 0; width: 100%">
 	<!-- Articles -->
-	<div id="dat-recent-posts" style="display: table-cell; width: 75%; border-right: 1px solid #e2e2e2">
-	  {{range .RecentPosts}}
-	  <div style="width: 100%; border-bottom: 1px solid #e2e2e2">
-	    <a href="/posts/{{.ID}}"
-	       style="margin-bottom: 0; font-size: 2.6em; font-weight: 900; font-style: italic; text-decoration: none; color: inherit"
-	       onmouseover="this.style.textDecoration='underline';"; onmouseout="this.style.textDecoration='none';">{{.Title}}</a>
+	<div style="display: table-cell; width: 75%; border-right: 1px solid #e2e2e2">
+	  <div style="overflow: hidden; width: 100%">
+	    <div style="margin-bottom: 0; font-size: 2.6em; font-weight: 900; font-style: italic">{{.Title}}</div>
 	    <div style="margin-top: 0.4em; margin-bottom: 1em; color: #999">{{.Date}}</div>
-	    <div style="margin-bottom: 1em; font-size: 1.1em; word-wrap: break-word; line-height: 1.3em; 
-			overflow: hidden; text-overflow: ellipsis; max-height: 26em;">{{.Content}}</div>
+	    <div style="margin-bottom: 1em; font-size: 1.1em; word-wrap: break-word; line-height: 1.3em">{{.Content}}</div>
+	    <div id="dat-comments" style="float:right; margin: 1em 3em 0 0">
+	      <button style="width: 80px; height: 69px; background-color: inherit;
+			     background-image: url(/images/comments.png); 
+			     padding: 0; border: none; outline: none; color: white;
+			     cursor: hand; cursor: pointer">
+		<span style="font-size: 1.3em; display:block; position:relative; top: -3px">4</span>
+		<span style="margin-bottom: 1em; display:block; position:relative; top: -3px">Comments</span>
+	      </button>
+	    </div>
 	  </div>
-	  {{end}}
 	</div>
 	<!-- Articles -->
 	<!-- SideBar -->

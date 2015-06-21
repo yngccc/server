@@ -1,4 +1,20 @@
 (function () {
+    var recent_posts = document.getElementById("dat-recent-posts");
+    if (recent_posts) {
+	recent_posts.lastElementChild.style.borderBottomWidth = 0
+    }
+})();
+
+(function () {
+    comments_button = document.getElementById("dat-comments");
+    if (comments_button) {
+	comments_button.onclick = function() {
+	    alert("clicked");
+	};
+    }
+})();
+
+(function () {
     var canvas = document.getElementById("dat-canvas");
     var ctx = canvas.getContext("2d");
     var canvas_div = document.getElementById("dat-canvas-div");
@@ -15,18 +31,6 @@
     	ctx.stroke();
     }, 64);
 })();
-
-// // highlight menu items when mouse over
-// var nav_menu  = document.getElementsByClassName("dat nav menu");
-
-// for (var i = 0; i < nav_menu.length; ++i) {
-// 	nav_menu[i].onmouseover = function() {
-// 	    this.style["background-color"] = "#e2e2e2";
-// 	}
-// 	nav_menu[i].onmouseout = function() {
-// 	    this.style["background-color"] = "#ffffff";
-// 	}
-// }
 
 // // double pendulum
 // var dpendulum_w1 = 0;
