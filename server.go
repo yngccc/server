@@ -19,25 +19,69 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	sqlStmt := `SELECT * FROM POSTS;`
-	rows, err := db.Query(sqlStmt)
+	_, err = db.Exec(`pragma foreign_keys = ON;`)
 	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
-		return
+		log.Fatal(err)
+	}
+	type Comment struct {
+		ID       int
+		Author   string
+		Content  string
+		Children []Comment
 	}
 	type Post struct {
-		ID      int
-		Date    string
-		Title   string
-		Content string
+		ID          int
+		Date        string
+		Title       string
+		Content     string
+		Comments    []Comment
+		NumComments int
+	}
+	var fetchComments func(postID, parentID int) []Comment
+	fetchComments = func(postID, parentID int) []Comment {
+		commentRows, err := db.Query(`select * from comments where post = ` + strconv.Itoa(postID) + ` and parent = ` + strconv.Itoa(parentID) + `;`)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer commentRows.Close()
+		comments := make([]Comment, 0)
+		for commentRows.Next() {
+			comments = append(comments, Comment{})
+			comment := &comments[len(comments)-1]
+			var ignore int
+			err := commentRows.Scan(&comment.ID, &comment.Author, &comment.Content, &ignore, &ignore)
+			if err != nil {
+				log.Fatal(err)
+			}
+			comment.Children = fetchComments(postID, comment.ID)
+		}
+		return comments
+	}
+	var getNumComments func(comments []Comment) int
+	getNumComments = func(comments []Comment) int {
+		total := 0
+		for _, comment := range comments {
+			total += (1 + getNumComments(comment.Children))
+		}
+		return total
 	}
 	posts := make([]Post, 0)
-	for rows.Next() {
+	postRows, err := db.Query(`select * from posts;`)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer postRows.Close()
+	for postRows.Next() {
 		var p Post
-		rows.Scan(&p.ID, &p.Date, &p.Title, &p.Content)
+		err := postRows.Scan(&p.ID, &p.Date, &p.Title, &p.Content)
+		if err != nil {
+			log.Fatal(err)
+		}
+		p.Comments = fetchComments(p.ID, 0)
+		p.NumComments = getNumComments(p.Comments)
 		posts = append(posts, p)
 	}
-	rows.Close()
 	if len(posts) > 1 {
 		for i := 0; i < len(posts)-1; i++ {
 			for j := 0; j < len(posts)-1; j++ {
@@ -76,11 +120,9 @@ func main() {
 	postHTMLs := make([]bytes.Buffer, len(posts))
 	for i, p := range posts {
 		postTemplateData := struct {
+			ThisPost    Post
 			RecentPosts []Post
-			Date        string
-			Title       string
-			Content     string
-		}{indexTemplateData.RecentPosts, p.Date, p.Title, p.Content}
+		}{p, indexTemplateData.RecentPosts}
 		postTemplate.Execute(&postHTMLs[i], postTemplateData)
 	}
 	log.Println("html generated")

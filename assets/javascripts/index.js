@@ -1,12 +1,14 @@
 (function () {
     var recent_posts = document.getElementById("dat-recent-posts");
     if (recent_posts) {
-	recent_posts.lastElementChild.style.borderBottomWidth = 0
+	if (recent_posts.lastElementChild) {
+	    recent_posts.lastElementChild.style.borderBottomWidth = 0;
+	}
     }
 })();
 
 (function () {
-    comments_button = document.getElementById("dat-comments");
+    var comments_button = document.getElementById("dat-comments");
     if (comments_button) {
 	comments_button.onclick = function() {
 	    alert("clicked");
@@ -26,8 +28,7 @@
     	// console.log(dpendulum_w1, dpendulum_w2, dpendulum_a1, dpendulum_a2);
     	ctx.clearRect(0, 0, canvas.width, canvas.height);
     	ctx.beginPath();
-    	ctx.arc(canvas.width / 2, canvas.height / 2,
-    		Math.random() * canvas.height / 2, 0, 2 * Math.PI);
+    	ctx.arc(canvas.width / 2, canvas.height / 2, Math.random() * canvas.height / 2, 0, 2 * Math.PI);
     	ctx.stroke();
     }, 64);
 })();
