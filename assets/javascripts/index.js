@@ -8,11 +8,14 @@
 })();
 
 (function () {
-    var comments_button = document.getElementById("dat-comments");
-    if (comments_button) {
-	comments_button.onclick = function() {
-	    alert("clicked");
-	};
+    var replys = document.getElementsByClassName("dat-reply");
+    for (var i = 0; i < replys.length; i++) {
+	replys[i].onclick = function(reply) {
+	    return function() {
+		var form = reply.nextElementSibling;
+		form.hidden = !form.hidden;
+	    }
+	}(replys[i]);
     }
 })();
 
