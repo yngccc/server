@@ -48,8 +48,9 @@ func main() {
 		for commentRows.Next() {
 			comments = append(comments, Comment{})
 			comment := &comments[len(comments)-1]
-			var ignore int
-			err := commentRows.Scan(&comment.ID, &comment.Author, &comment.Content, &ignore, &ignore)
+			var ignore string
+			var ignore2 int
+			err := commentRows.Scan(&comment.ID, &comment.Author, &ignore, &comment.Content, &ignore2, &ignore2)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -64,6 +65,21 @@ func main() {
 			total += (1 + getNumComments(comment.Children))
 		}
 		return total
+	}
+	var hasCommentID func(comments []Comment, ID int) bool
+	hasCommentID = func(comments []Comment, ID int) bool {
+		if len(comments) == 0 {
+			return false
+		}
+		for _, comment := range comments {
+			if comment.ID == ID {
+				return true
+			}
+			if hasCommentID(comment.Children, ID) {
+				return true
+			}
+		}
+		return false
 	}
 	posts := make([]Post, 0)
 	postRows, err := db.Query(`select * from posts;`)
@@ -135,7 +151,42 @@ func main() {
 		n := i
 		id := strconv.Itoa(p.ID)
 		router.HandleFunc("/posts/"+id, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(w, postHTMLs[n].String())
+			if r.Method == "GET" {
+				fmt.Fprint(w, postHTMLs[n].String())
+			} else if r.Method == "POST" {
+				err := r.ParseForm()
+				if err == nil {
+					name, nameExist := r.PostForm["name"]
+					email, emailExist := r.PostForm["email"]
+					comment, commentExist := r.PostForm["comment"]
+					parent, parentExist := r.PostForm["parent"]
+					if nameExist && emailExist && commentExist && parentExist {
+						if len(name) == 1 && len(email) == 1 && len(comment) == 1 && len(parent) == 1 {
+							name := name[0]
+							email := email[0]
+							comment := comment[0]
+							parent := parent[0]
+							parentID, _ := strconv.Atoi(parent)
+							if parentID == 0 || hasCommentID(posts[n].Comments, parentID) {
+								stm, _ := db.Prepare(`insert into comments values(null, ?, ?, ?, ?, ?);`)
+								_, err := stm.Exec(name, email, comment, id, parent)
+								if err == nil {
+									posts[n].Comments = fetchComments(posts[n].ID, 0)
+									posts[n].NumComments = getNumComments(posts[n].Comments)
+									log.Print(posts[n].NumComments)
+									postTemplateData := struct {
+										ThisPost    Post
+										RecentPosts []Post
+									}{posts[n], posts[0:min(10, len(posts))]}
+									postHTMLs[n].Reset()
+									postTemplate.Execute(&postHTMLs[n], postTemplateData)
+								}
+							}
+						}
+					}
+				}
+				http.Redirect(w, r, "/posts/"+id+"#comments", 302)
+			}
 		}))
 	}
 	router.Handle("/javascripts/{file}", http.StripPrefix("/javascripts/", http.FileServer(http.Dir("./assets/javascripts"))))

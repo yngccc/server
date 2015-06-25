@@ -5,7 +5,7 @@
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
   <title>dPendulum</title>
 </head>
-<body>
+<body style="font-family: verdana,arial,helvetica,sans-serif">
   <!-- Header -->
   <div id="header" style="width: 75%; margin: 0 auto; border-bottom:3px solid black">
     <div id="dat-canvas-div" style="display:inline-block; width: 20%">
@@ -29,8 +29,8 @@
 	       style="margin-bottom: 0; font-size: 2.6em; font-weight: 900; font-style: italic; text-decoration: none; color: inherit"
 	       onmouseover="this.style.textDecoration='underline';"; onmouseout="this.style.textDecoration='none';">{{.Title}}</a>
 	    <div style="margin-top: 0.4em; margin-bottom: 1em; color: #999">{{.Date}}</div>
-	    <div style="margin-bottom: 1em; font-size: 1.1em; word-wrap: break-word; line-height: 1.3em; 
-			overflow: hidden; text-overflow: ellipsis; max-height: 26em;">{{.Content}}</div>
+	    <div style="margin-bottom: 1em; font-size: 1.1em; line-height: 1.5em; 
+			overflow: hidden; text-overflow: ellipsis; max-height: 24em;">{{.Content}}</div>
 	  </div>
 	  {{end}}
 	</div>
@@ -40,12 +40,11 @@
 	  <div>
 	    <h2 style="margin: 0; text-align: center">Recent Posts</h2>
 	    {{range .RecentPosts}}
-	    <div style="padding: 0.3em 0 0.3em 0; border-top: 1px solid #e2e2e2">
-	      {{.Title}}
+	    <div style="padding: 0.3em 0 0.3em 0; border-top: 1px solid #e2e2e2; text-align: center">
+	      <a href="/posts/{{.ID}}" style="color: inherit; text-decoration: none">{{.Title}}</a>
 	    </div>
 	    {{end}}
 	  </div>
-	  <h2 style="margin: 0; text-align: center">Archives</h2>
 	</div>
 	<!-- SideBar -->
       </div>

@@ -5,7 +5,7 @@
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
   <title>dPendulum</title>
 </head>
-<body>
+<body style="font-family: verdana, arial, helvetica, sans-serif">
   <!-- Header -->
   <div id="header" style="width: 75%; margin: 0 auto; border-bottom:3px solid black">
     <div id="dat-canvas-div" style="display:inline-block; width: 20%">
@@ -26,28 +26,55 @@
 	  <div style="overflow: hidden; width: 100%">
 	    <div style="margin-bottom: 0; font-size: 2.6em; font-weight: 900; font-style: italic">{{.ThisPost.Title}}</div>
 	    <div style="margin-top: 0.4em; margin-bottom: 1em; color: #999">{{.ThisPost.Date}}</div>
-	    <div style="margin-bottom: 1em; font-size: 1.1em; word-wrap: break-word; line-height: 1.3em">{{.ThisPost.Content}}</div>
-	    <div style="text-align: center">
-	      <button id="dat-comments" style="width: 80px; height: 69px; background-color: inherit;
-			     background-image: url(/images/comments.png); 
-			     padding: 0; border: none; outline: none; color: white;
-			     cursor: hand; cursor: pointer">
-		<span style="font-size: 1.3em; display:block; position:relative; top: -3px">{{.ThisPost.NumComments}}</span>
-		<span style="margin-bottom: 1em; display:block; position:relative; top: -3px">Comments</span>
-	      </button>
-	    </div>
-	    <div>
+	    <div style="margin-bottom: 1em; font-size: 1.1em; line-height: 1.5em">{{.ThisPost.Content}}</div>
+	    <a name="comments"></a>
+	    <button id="dat-comments" style="width: 80px; height: 68px; background-color: inherit;
+					     background-image: url(/images/comments.png); 
+					     padding: 0; border: none; outline: none; color: white; cursor: pointer">
+	      <span style="font-size: 1.3em; display:block; position:relative; top: -3px">{{.ThisPost.NumComments}}</span>
+	      <span style="margin-bottom: 1em; display:block; position:relative; top: -3px">Comments</span>
+	    </button>
+	    <div style="width: 100%; position:relative; left: -2em; margin-top: 1em">
 	      {{define "Comments"}}
 	      {{range .}}
-	      <div>
-		<div>{{.Author}}</div>
-		<div>{{.Content}}</div>
+	      <div style="width: calc(100% - 2em); position: relative; left: 2em">
+		<h3 style="margin-bottom: 0.5em">{{.Author}}</h3>
+		<div style="margin-bottom: 0.5em">{{.Content}}</div>
+		<button class="dat-reply" style="font-size: 0.70em; color: #326891; background-color: Transparent; border: none; outline: none; cursor:pointer"
+		     onmouseover="this.style.textDecoration='underline'"
+		     onmouseout="this.style.textDecoration='none'">Reply</button>
+		<form hidden style="width: 100%" action="" method="post">
+		  <input type="hidden" name="parent" value={{.ID}}>
+		  Name <br>
+		  <input required type="text" name="name" size="32">
+		  <br>
+		  Email <br>
+		  <input required type="text" name="email" size="32" placeholder="Your email will not be shared">
+		  <br>
+		  Comment <br>
+		  <textarea required name="comment" style="width: 99%; height: 8em; resize: vertical"></textarea>
+		  <br>
+		  <input type="submit" value="Submit Comment" style="float: right">
+		</form>
 		{{template "Comments" .Children}}
 	      </div>
 	      {{end}}
 	      {{end}}
 	      {{template "Comments" .ThisPost.Comments}}
 	    </div>
+	    <form style="width: 100%; margin-top: 3em" action="" method="post">
+	      <input type="hidden" name="parent" value=0>
+	      Name <br>
+	      <input required type="text" name="name" size="32">
+	      <br>
+	      Email <br>
+	      <input required type="text" name="email" size="32" placeholder="Your email will not be shared">
+	      <br>
+	      Comment <br>
+	      <textarea required name="comment" style="width: 99%; height: 8em; resize: vertical"></textarea>
+	      <br>
+	      <input type="submit" value="Submit Comment" style="float: right">
+	    </form>
 	  </div>
 	</div>
 	<!-- Articles -->
@@ -57,12 +84,11 @@
 	    <div>
 	      <h2 style="margin: 0; text-align: center">Recent Posts</h2>
 	      {{range .RecentPosts}}
-	      <div style="padding: 0.3em 0 0.3em 0; border-top: 1px solid #e2e2e2">
-		{{.Title}}
+	      <div style="padding: 0.3em 0 0.3em 0; border-top: 1px solid #e2e2e2; text-align: center">
+		<a href="/posts/{{.ID}}" style="color: inherit; text-decoration: none">{{.Title}}</a>
 	      </div>
 	      {{end}}
 	    </div>
-	    <h2 style="margin: 0; text-align: center">Archives</h2>
 	  </div>
 	</div>
 	<!-- SideBar -->
